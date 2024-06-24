@@ -1,218 +1,35 @@
-OSCam-emu: Open Source Conditional Access Module Emulator
+OSCam-Emu: Open Source Conditional Access Module Emulator
 =========================================================
 
-OSCam-emu is an Oscam addon module to include emulator support and other functionality that collides with the goal of the original oscam developers.
+OSCam-Emu is an addon module that adds emulator support and other functionality to the OSCam server.
 
-This patch creates a virtual card reader which is configured automatically.
-You may save the default reader configuration with the webif and then modify it to your own liking.
-
-Key file ("SoftCam.Key"):
-OSCam-emu does not require, but will make use of "SoftCam.Key" if available.
-"SoftCam.Key" is searched in the oscam config folder (where oscam.conf is located) and also in "/var/keys".
-
-You may use OSEmu instead and add it as a reader to your plain oscam server.
+You may use OSEmu instead and add it as a reader to your plain OSCam server.
 OSEmu can be found at https://github.com/oscam-emu/OSEmu
-
-Supported systems
-=================
-
-Currently only the following crypto systems are available:
- - Cryptoworks
- - SoftNDS
- - Viaccess 1/2/3
- - Nagra 2
- - Irdeto 2
- - Biss (Mode 1) [Note: only 1 key possible for a sid/pid combination, use the oscam constcw reader if you need more]
- - PowerVU (via Stream Relay)
- - Drecrypt2
-
-All of these are basically working, but far from complete so anyone filling in blanks is welcome...
-
-
-TODO
-====
-
-Work has to be done on the following items:
- - Add other encryption systems
 
 
 Version history
 ===============
 
-OSCam-emu history is accessible through GitHub commits at:
-   https://github.com/oscam-emu/oscam-emu
-
-
-Building OSCam-emu from source
-==============================
-
- - Get the lastest oscam sources from SVN:
-    svn checkout http://www.streamboard.tv/svn/oscam/trunk oscam-svn
-
- - Save the oscam-emu.patch file:
-    wget https://github.com/oscam-emu/oscam-emu/raw/master/oscam-emu.patch
-
- - Go to oscam-svn directory:
-    cd oscam-svn
-
- - Patch the source with the EMU patch:
-    patch -p0 < ../oscam-emu.patch
-    
- - OR: Instead of 'patch', you may also use 'svn patch':
-    svn patch ../oscam-emu.patch
-    
- - Put a SoftCam.Key file into the oscam-svn directory (for example from skystar.org)
-   Note: This does not apply for Mac OSX and Android, SoftCam.Key cannot be integrated on these systems at the moment.
-  
- - Run `./config.sh -g` to choose the features you want.
-
- - Run `make` to compile OSCam.
-
-
-OSCam dvbapi config
-===================
-
-If dvbapi is activated, the "delayer" option is forced to have a value of at least 60.
-This is to avoid freezes/crashes because of too fast ecm responses.
+OSCam-Emu history is accessible through GitHub commits at:
+   https://github.com/oscam-emu/oscam-patched
 
 
 Help and Support
 ================
 
-You may visit our issues system for filling in bug reports regarding EMU issues.
-   https://github.com/oscam-emu/oscam-emu/issues
+OSCam-Emu Configuration wiki:
+   https://github.com/oscam-emu/oscam-patched/wiki
 
-Configuration wiki:
+Bug reports and feature requests:
+   https://github.com/oscam-emu/oscam-patched/issues
+
+OSCam Configuration wiki:
    http://www.streamboard.tv/wiki/index.php/OSCam
 
 
-BISS/ConstCW config
-===================
+Contact
+=======
 
-Syntax for keys in SoftCam.Key: (key number can be '00' or '01')
-F <service id><ecm pid> <key number> <key>
-
-Example:
-
-	service id: 2222
-	ecm pid: 1111
-	key: 0102030405060708
-
-	F 22221111 00 0102030405060708
-	
-Important:
-	The correct ecm pid is only available when using oscam dvbapi.
-	For example:
-			oscam (dvbapi) <-> OSEmu
-			oscam (dvbapi) <-> oscam <-> OSEmu
-			
-	When using another client like cccam, the ecm pid seen by OSEmu will always be '1FFF'
-	For example:
-			cccam <-> oscam <-> OSEmu
-			cccam <-> OSEmu
-	In this case the above example key line needs to be changed to:
-	F 22221FFF 00 0102030405060708
-	
-PowerVU config
-==============
-
-Keys in SoftCam.Key:
-	P <srvid> <nb> <key>
-	example:
-	P 1234 01 11223344556677
-
-	For channels with same srvid the correct key will be detected automatically:
-	P 1234 01 11223344556677
-	P 1234 01 11223344556677
-	P 1234 01 11223344556677
-	
-	AU keys:
-	P <srvid> <UA> <key>
-	example:
-	P 1234 11223344 11223344556677
-
-On compatible Dreambox STBs:
-
-	1) Disable the Stream Relay (on by default):
-		Webif -> Config -> Stream Relay -> Mode
-			0 - disabled
-		
-		or in oscam.conf:	
-			
-		[streamrelay]
-		stream_relay_enabled = 0
-		
-	2) Select the correct DVB-Api extended CW API:
-		Webif -> Config -> DVB-Api -> API for extended CWs
-			1 - OE 2.2
-			2 - OE 2.0
-			
-		or in oscam.conf:
-		
-		[dvbapi]
-		extended_cw_api = 2
-
-
-On other devices the Stream Relay must be used:
-
-IMPORTANT:
-	The stream relay needs a fast CPU. Not every STB is fast enough.
-	If you cannot fix stuttering with the following guide, likely your CPU is 
-	too slow.
-
-	For best performance, the "Include ECM in http streams" setting must be enabled.
-	If your image supports it (openpli, openatv), you can find it here:
-	OpenWebif -> Settings -> Customize
-	
-	If the setting is not available, you may need to adjust the "ECM fix delay"
-	setting in oscam webif (Config -> Stream Relay).
-	Increase/Lower it until there is no stuttering.
-
-	When using VU+ devices, make sure to use the latest drivers (June 2015), if 
-	you encounter any problems.
-
-Channel Config:
-1. Go to the OpenWebif and click on the "Stream" button for the channel you want to add.
-2. Download and save the .m3u file.
-3. Open the .m3u file with a text edior and get the stream link. It looks like this:
-	http://stb:8001/1:0:19:0123:3EF:1:C00000:0:0:0:
-4. Replace the port (8001) with the relay port (default: 17999) and the host name ("stb") with 127.0.0.1
-	http://127.0.0.1:17999/1:0:19:0123:3EF:1:C00000:0:0:0:
-5. Add the new stream link to your channel list (for example with DreamBoxEdit)
-
-IMPORTANT:
-	Do NOT use the correct Transponder ID/Network ID/Namespace for the stream link.
-	Use Transponder ID: "11", Network ID: "22" and Namespace: "33".
-	Set Service Type to "1", and enter the correct Service ID for the channel.
-
-Note: 
-	When using DreamBoxEdit:
-	
-	A. Go to the list in the middle "Bouquet details".
-	B. Right click on a channel, select "IPTV and other streaming services", select "Add".
-	C. Select "DVB/TS".
-	D. Chosse a name and use the new stream link as URL.
-	E. Use the "Service ID" of the original channel. You can find it in the left list ("Services")
-	
-
-Drecrypt2 config:
-=================
-
-Keys in SoftCam.Key:
-
-D <caid><provider> <key type><key index> <key>
-example:
-D 4AE1FF AA01 112233445566778899AABBCCDDEEFF0011223344556677889900AABBCCDDEEFF
-
-Overcrypt keys (16 keys):
-D 0 <number> <key>
-example:
-D 0 0 1122334455667788
-...
-D 0 F 1122334455667788
-
-AU keys:
-D <caid><provider> MK<key type><key index> <key>
-example:
-D 4AE1FF MKAA01 112233445566778899AABBCCDDEEFF0011223344556677889900AABBCCDDEEFF
+If you need to contact the developers and the issue page in the github is not appropriate, you can email us at:
+   oscam.emu@gmail.com
 
